@@ -4,39 +4,243 @@ import Tambourine
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
-  override func application(
-    _ application: UIApplication,
-    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
-  ) -> Bool {
-
-    let controller = window?.rootViewController as! FlutterViewController
+    
+    lazy var flutterEngine = FlutterEngine(name: "my flutter engine")
+    
+    override func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+    ) -> Bool {
+        
+        flutterEngine.run()
+        
+        // Get Flutter view controller
+        let controller = window?.rootViewController as! FlutterViewController
+        
+        let navigationController = UINavigationController(rootViewController: controller)
+        navigationController.setNavigationBarHidden(true, animated: false) // Hide nav bar
+        window?.rootViewController = navigationController
+        window?.makeKeyAndVisible()
+        
+        // Setup method channels
+        setupNavigationChannel(controller: controller)
+        
+        GeneratedPluginRegistrant.register(with: self)
+        return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+    }
+    
+    private func setupNavigationChannel(controller: FlutterViewController) {
         let channel = FlutterMethodChannel(
             name: "com.yourapp/native_channel",
             binaryMessenger: controller.binaryMessenger
         )
         
-        channel.setMethodCallHandler { (call: FlutterMethodCall, result: @escaping FlutterResult) in
+        channel.setMethodCallHandler { [weak self] (call: FlutterMethodCall, result: @escaping FlutterResult) in
+            guard let self = self else { return }
+            
             if call.method == "simpleFunction" {
                 self.simpleFunction()
-                result(nil)  // Return nothing
+                result(nil)
+            }
+            else if call.method == "pushNativeScreen" {
+                let args = call.arguments as? [String: Any]
+                let screenName = args?["screenName"] as? String ?? ""
+                let data = args?["data"] as? [String: Any]
+                
+                self.pushNativeScreen(screenName: screenName, data: data)
+                result(nil)
+                
+            } else if call.method == "popScreen" {
+                self.popScreen()
+                result(nil)
+                
             } else {
                 result(FlutterMethodNotImplemented)
             }
         }
-
-    GeneratedPluginRegistrant.register(with: self)
-    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
-  }
-
-  private func simpleFunction() {
-        // Your iOS code here
+    }
+    
+    private func pushNativeScreen(screenName: String, data: [String: Any]?) {
+        DispatchQueue.main.async {
+            guard let window = UIApplication.shared.windows.first,
+                  let navController = window.rootViewController as? UINavigationController else {
+                print("❌ No navigation controller found")
+                return
+            }
+            
+            var nativeVC: UIViewController
+            
+            switch screenName {
+            case "Profile":
+                let profileVC = ProfileViewController()
+                profileVC.userId = data?["userId"] as? String
+                nativeVC = profileVC
+                
+            case "Settings":
+                nativeVC = SettingsViewController()
+                
+            case "AudioPlayer":
+                nativeVC = AudioPlayerViewController()
+                
+            default:
+                nativeVC = UIViewController()
+                nativeVC.view.backgroundColor = .white
+            }
+            
+            nativeVC.title = screenName
+            navController.pushViewController(nativeVC, animated: true)
+        }
+    }
+    
+    // Pop back to Flutter
+    private func popScreen() {
+        DispatchQueue.main.async {
+            guard let window = UIApplication.shared.windows.first,
+                  let navController = window.rootViewController as? UINavigationController else {
+                return
+            }
+            navController.popViewController(animated: true)
+        }
+    }
+    
+    // Your existing function (keep this)
+    private func simpleFunction() {
         print("Simple function called from Flutter!")
         TambourinePlayerService.shared.play(Podcast())
-        
-        // Do whatever you want
-        // Example: Show alert, save data, access native features, etc.
     }
 }
+
+
+// ProfileViewController.swift
+class ProfileViewController: UIViewController {
+    
+    var userId: String?
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .white
+        title = "Native Profile"
+        
+        // Show back button
+        navigationController?.setNavigationBarHidden(false, animated: false)
+        
+        setupUI()
+    }
+    
+    private func setupUI() {
+        let label = UILabel()
+        label.text = "Native iOS Profile Screen\nUser ID: \(userId ?? "N/A")\n\n✅ Pushed from Flutter!"
+        label.numberOfLines = 0
+        label.textAlignment = .center
+        label.font = .systemFont(ofSize: 20, weight: .bold)
+        
+        view.addSubview(label)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            label.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            label.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            label.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
+        ])
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        // Hide nav bar when going back to Flutter
+        if isMovingFromParent {
+            navigationController?.setNavigationBarHidden(true, animated: animated)
+        }
+    }
+}
+
+// SettingsViewController.swift
+class SettingsViewController: UIViewController {
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .white
+        title = "Native Settings"
+        
+        navigationController?.setNavigationBarHidden(false, animated: false)
+        
+        setupUI()
+    }
+    
+    private func setupUI() {
+        let label = UILabel()
+        label.text = "Native iOS Settings Screen\n\n✅ Pushed from Flutter!"
+        label.numberOfLines = 0
+        label.textAlignment = .center
+        label.font = .systemFont(ofSize: 20, weight: .bold)
+        
+        view.addSubview(label)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            label.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            label.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            label.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
+        ])
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        if isMovingFromParent {
+            navigationController?.setNavigationBarHidden(true, animated: animated)
+        }
+    }
+}
+
+// AudioPlayerViewController.swift (Example with Tambourine integration)
+class AudioPlayerViewController: UIViewController {
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .white
+        title = "Audio Player"
+        
+        navigationController?.setNavigationBarHidden(false, animated: false)
+        
+        setupUI()
+    }
+    
+    private func setupUI() {
+        let playButton = UIButton(type: .system)
+        playButton.setTitle("Play Podcast from Native", for: .normal)
+        playButton.titleLabel?.font = .systemFont(ofSize: 18, weight: .bold)
+        playButton.backgroundColor = .systemBlue
+        playButton.setTitleColor(.white, for: .normal)
+        playButton.layer.cornerRadius = 12
+        playButton.addTarget(self, action: #selector(playPodcast), for: .touchUpInside)
+        
+        view.addSubview(playButton)
+        playButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            playButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            playButton.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            playButton.widthAnchor.constraint(equalToConstant: 300),
+            playButton.heightAnchor.constraint(equalToConstant: 50)
+        ])
+    }
+    
+    @objc private func playPodcast() {
+        // Use your existing Tambourine integration
+        TambourinePlayerService.shared.play(Podcast())
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        if isMovingFromParent {
+            navigationController?.setNavigationBarHidden(true, animated: animated)
+        }
+    }
+}
+
+// Keep all your existing Tambourine code below...
+// (Chapters, Podcast, TambourinePlayerService, etc.)
 
 class Chapters: ChapterText {
     var name: String

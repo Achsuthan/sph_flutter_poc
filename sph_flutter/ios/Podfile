@@ -8,7 +8,6 @@ target 'Runner' do
   # Comment the next line if you don't want to use dynamic frameworks
   use_frameworks!
 
-    pod 'Alamofire', '~> 5.0'
     pod 'SPHUIKit/SPHPopup', '2.0.1'
   pod 'SPHUIKit/SPHProgressButton', '2.0.1'
   pod 'SPHUIKit/SPHScrollableMenuView', '2.0.1'

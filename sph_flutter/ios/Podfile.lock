@@ -1,6 +1,5 @@
 PODS:
   - ActiveLabel (1.1.0)
-  - Alamofire (5.10.2)
   - CachingPlayerItem (1.1.3)
   - Coordinator (2.0.0)
   - Firebase (10.29.0):
@@ -240,7 +239,6 @@ PODS:
   - Thunderbolt (2.2.5)
 
 DEPENDENCIES:
-  - Alamofire (~> 5.0)
   - Flagpole/FlagpoleFirebase (= 1.3.0)
   - lottie-ios
   - NetworkOperationQueue (= 1.2.4)
@@ -257,7 +255,6 @@ DEPENDENCIES:
 SPEC REPOS:
   https://github.com/CocoaPods/Specs.git:
     - ActiveLabel
-    - Alamofire
     - CachingPlayerItem
     - Firebase
     - FirebaseABTesting
@@ -313,7 +310,6 @@ CHECKOUT OPTIONS:
 
 SPEC CHECKSUMS:
   ActiveLabel: 5e3f4de79a1952d4604b845a0610d4776e4b82b3
-  Alamofire: 7193b3b92c74a07f85569e1a6c4f4237291e7496
   CachingPlayerItem: bb766adfeed3119bc28e28f24498d462620b7420
   Coordinator: 3006f3705f60b101e46dd40f7707e7f6a1c0cb07
   Firebase: cec914dab6fd7b1bd8ab56ea07ce4e03dd251c2d
@@ -351,12 +347,12 @@ SPEC CHECKSUMS:
   SwiftMessages: b577dc7043be8b299857ab35bb663dbff6483bd0
   SwiftSoup: 9ec2526c76ebc3fe5d3157c82b40b45a27eeb82d
   Tagger: 3b75b509613dc217aa600c8a6fc4f44754c032f8
-  Tambourine: 222a3f247b3d0d8173663d5b1268d220258b0e0d
+  Tambourine: 0561857e15fbac29ecc0ba24e1b24178d3c82dab
   TargetExtension: 83ba562c7445c4ecb6e4658119da0177eff34d0f
   Teleport: 9f33ffd9f6a93f9f9e1e5429fa2ea21b7908a53f
   Thesaurus: 8173af706d19988437270ae0dcf443b7721f0650
   Thunderbolt: fe95462a75a5bf3069b7ad551613010ae5321cba
 
-PODFILE CHECKSUM: a999dea38dac38bcc0427e5d12bb3c3db3218fb5
+PODFILE CHECKSUM: 02ae7d4ab41eebc7d6bba7c0b8da73dae6dea29e
 
 COCOAPODS: 1.16.2
